@@ -1,0 +1,14 @@
+# Accidentally cloned/linked directories
+C:\Users\
+
+# Environment files
+.env
+*.local.md
+
+# Docker volumes and data
+volumes/
+data/
+
+# Secrets
+secrets.yaml
+*.secret
