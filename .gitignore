@@ -12,3 +12,10 @@ data/
 # Secrets
 secrets.yaml
 *.secret
+
+# Docker artifacts
+docker-secrets.env
+.env
+
+# Generated configs
+*/config/generated/
