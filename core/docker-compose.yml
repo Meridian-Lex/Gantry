@@ -12,3 +12,33 @@ networks:
   monitoring-network:
     name: lex-monitoring
     driver: bridge
+
+volumes:
+  traefik_certs:
+  portainer_data:
+  authelia_config:
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: lex-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/certs
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    networks:
+      - frontend-network
+      - backend-network
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
