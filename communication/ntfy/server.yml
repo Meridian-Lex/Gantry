@@ -1,0 +1,8 @@
+base-url: http://localhost:2586
+cache-file: /var/cache/ntfy/cache.db
+cache-duration: "12h"
+keepalive-interval: "45s"
+manager-interval: "1m"
+attachment-cache-dir: /var/cache/ntfy/attachments
+attachment-total-size-limit: "5G"
+attachment-file-size-limit: "100M"
