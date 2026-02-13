@@ -1,6 +1,6 @@
 # Docker Infrastructure Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **For Lex:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build and deploy a multi-service Docker infrastructure stack for the Meridian Lex autonomous agent system with 15 services across 5 functional groups.
 
@@ -90,13 +90,13 @@ File: `scripts/init-docker-secrets.sh`
 #!/bin/bash
 set -euo pipefail
 
-# Secrets initialization for lex-docker infrastructure
+# Secrets initialization for Gantry infrastructure
 # Integrates with Meridian Lex ~/.config/secrets.yaml
 
 SECRETS_FILE="$HOME/.config/secrets.yaml"
 DOCKER_SECRETS_ENV="$(dirname "$0")/../docker-secrets.env"
 
-echo "==> Initializing Docker secrets for lex-docker"
+echo "==> Initializing Docker secrets for Gantry"
 
 # Check if secrets.yaml exists
 if [[! -f "$SECRETS_FILE" ]]; then
@@ -1142,7 +1142,7 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
   external_labels:
-    cluster: 'lex-docker'
+    cluster: 'Gantry'
 
 alerting:
   alertmanagers:
@@ -1599,7 +1599,7 @@ File: `scripts/deploy-stack.sh`
 #!/bin/bash
 set -euo pipefail
 
-# Deployment orchestration for lex-docker infrastructure
+# Deployment orchestration for Gantry infrastructure
 # Deploys service groups in correct dependency order
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -1607,7 +1607,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-echo "==> Deploying lex-docker infrastructure"
+echo "==> Deploying Gantry infrastructure"
 echo ""
 
 # Check if secrets are initialized
@@ -1724,7 +1724,7 @@ File: `scripts/teardown-stack.sh`
 #!/bin/bash
 set -euo pipefail
 
-# Teardown lex-docker infrastructure
+# Teardown Gantry infrastructure
 # Stops all services in reverse dependency order
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -1732,7 +1732,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 cd "$PROJECT_ROOT"
 
-echo "==> Tearing down lex-docker infrastructure"
+echo "==> Tearing down Gantry infrastructure"
 echo ""
 
 # Stop in reverse order
@@ -1805,7 +1805,7 @@ git push origin master
 
 File: `README.md`
 ```markdown
-# lex-docker
+# Gantry
 
 Docker infrastructure for the Meridian Lex autonomous agent system.
 
@@ -1937,7 +1937,7 @@ Self-signed certificates rotate every 25 days automatically via cron:
 crontab -e
 
 # Add line:
-0 2 */25 * * /path/to/lex-docker/scripts/rotate-certs.sh
+0 2 */25 * * /path/to/Gantry/scripts/rotate-certs.sh
 ```
 
 Traefik hot-reloads certificates without downtime.
@@ -2074,7 +2074,7 @@ File: `DEPLOY.md`
 ```markdown
 # Deployment Guide
 
-Step-by-step deployment instructions for lex-docker infrastructure.
+Step-by-step deployment instructions for Gantry infrastructure.
 
 ## Initial Setup
 
@@ -2098,8 +2098,8 @@ sudo chmod +x /usr/local/bin/yq
 
 ```bash
 cd ~/meridian-home/projects
-git clone git@github.com:Meridian-Lex/lex-docker.git
-cd lex-docker
+git clone git@github.com:Meridian-Lex/Gantry.git
+cd Gantry
 ```
 
 ### 3. Initialize Secrets
@@ -2110,7 +2110,7 @@ cd lex-docker
 
 **Expected output:**
 ```
-==> Initializing Docker secrets for lex-docker
+==> Initializing Docker secrets for Gantry
 ==> Secrets synchronized with /home/meridian/.config/secrets.yaml
 ==> Docker secrets exported to docker-secrets.env
 ==> File permissions set to 600
@@ -2159,7 +2159,7 @@ Now that the Traefik volume exists, this should succeed.
 crontab -e
 
 # Add line:
-0 2 */25 * * /home/meridian/meridian-home/projects/lex-docker/scripts/rotate-certs.sh
+0 2 */25 * * /home/meridian/meridian-home/projects/Gantry/scripts/rotate-certs.sh
 ```
 
 ## Verification
@@ -2414,7 +2414,7 @@ docker-compose -f <group>/docker-compose.yml up -d <service>
 
 - **Design document**: `docs/plans/2026-02-07-docker-infrastructure-design.md`
 - **Implementation plan**: `docs/plans/2026-02-07-docker-infrastructure-implementation.md`
-- **Repository**: https://github.com/Meridian-Lex/lex-docker
+- **Repository**: https://github.com/Meridian-Lex/Gantry
 ```
 
 **Step 2: Commit deployment guide**

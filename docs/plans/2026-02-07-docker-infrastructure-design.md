@@ -1,4 +1,4 @@
-# lex-docker Infrastructure Design
+# Gantry Infrastructure Design
 
 **Date:** 2026-02-07
 **Status:** Approved
@@ -6,7 +6,7 @@
 
 ## Overview
 
-The lex-docker infrastructure provides a multi-service containerized stack for the Meridian Lex autonomous agent system. The stack deploys 15 services organized into five functional groups with automated orchestration, network segmentation, and integrated secrets management.
+The Gantry infrastructure provides a multi-service containerized stack for the Meridian Lex autonomous agent system. The stack deploys 15 services organized into five functional groups with automated orchestration, network segmentation, and integrated secrets management.
 
 ## Architecture
 

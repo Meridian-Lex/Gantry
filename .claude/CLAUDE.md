@@ -1,27 +1,24 @@
+<!-- IDENTITY-EXCEPTION: functional internal reference — not for public exposure -->
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance when working with code in this repository.
 
 ## Project Overview
 
-**lex-docker** is the Docker infrastructure repository for the Meridian Lex system. It contains Dockerfiles and docker-compose configurations for various services deployed on the system.
+**Gantry** is the Docker infrastructure suite for the Meridian Lex system and the Stratavore fleet. It contains docker-compose configurations for all services deployed on the system — the support structure from which all fleet vessels are launched and maintained.
 
 ## Repository Structure
 
-Organize services by purpose:
+Services are organized by functional group:
 
 ```
-├── services/
-│   ├── service-name/
-│   │   ├── Dockerfile
-│   │   ├── docker-compose.yml
-│   │   ├── .env.example
-│   │   └── README.md
-├── shared/
-│   ├── base-images/
-│   └── common-configs/
-└── docs/
-    └── deployment-guides/
+├── core/                    # Infrastructure management (Traefik, Authelia, Portainer)
+├── storage/                 # Data persistence (PostgreSQL, Qdrant, OpenSearch, Memgraph, RabbitMQ)
+├── communication/           # Agent integration (ntfy, API Gateway)
+├── observability/           # Monitoring (Prometheus, Grafana, Loki, cAdvisor)
+├── utilities/               # Operational tools (FileBrowser, Watchtower)
+├── scripts/                 # Initialization and deployment scripts
+└── docs/                    # Architecture documentation
 ```
 
 ## Docker Development Commands
@@ -29,23 +26,17 @@ Organize services by purpose:
 ### Building and Running Services
 
 ```bash
-# Build a specific service
-docker-compose -f services/service-name/docker-compose.yml build
-
-# Start service in foreground (for debugging)
-docker-compose -f services/service-name/docker-compose.yml up
-
-# Start service in background
-docker-compose -f services/service-name/docker-compose.yml up -d
+# Start a service group in background
+docker compose -f <group>/docker-compose.yml up -d
 
 # View logs
-docker-compose -f services/service-name/docker-compose.yml logs -f
+docker compose -f <group>/docker-compose.yml logs -f
 
-# Stop service
-docker-compose -f services/service-name/docker-compose.yml down
+# Stop a service group
+docker compose -f <group>/docker-compose.yml down
 
 # Stop and remove volumes
-docker-compose -f services/service-name/docker-compose.yml down -v
+docker compose -f <group>/docker-compose.yml down -v
 ```
 
 ### Container Management
@@ -127,12 +118,10 @@ Each service directory must include:
 
 ## Deployment Workflow
 
-1. Develop and test locally with docker-compose
-2. Document configuration in service README
-3. Create `.env.example` with all required variables
-4. Test build and deployment from clean state
-5. Commit Dockerfile and docker-compose.yml
-6. Deploy to system using documented procedure
+1. Run `scripts/init-docker-secrets.sh` to generate credentials
+2. Review generated `docker-secrets.env`
+3. Deploy with `scripts/deploy-stack.sh` or per-group compose commands
+4. Validate service health via Portainer or `docker ps`
 
 ## System Context
 
@@ -140,8 +129,9 @@ This repository is part of the **Meridian Lex** infrastructure:
 - **Platform**: Debian 12 Linux
 - **User**: meridian
 - **Home base**: `~/meridian-home/`
-- **Docker**: Installed and configured for non-root use
+- **Docker**: Installed and configured
 - **Secrets**: Managed in `~/.config/secrets.yaml`
+- **GitHub**: `Meridian-Lex/Gantry`
 
 ## Common Patterns
 
@@ -170,24 +160,6 @@ volumes:
   db-data:
 ```
 
-### Multi-Stage Build
-
-```dockerfile
-# Build stage
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-
-# Runtime stage
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app/node_modules ./node_modules
-COPY . .
-USER node
-CMD ["node", "server.js"]
-```
-
 ## Troubleshooting
 
 - **Port conflicts**: Check with `docker ps` and `ss -tulpn`
@@ -195,3 +167,4 @@ CMD ["node", "server.js"]
 - **Network issues**: Verify service names resolve within Docker network
 - **Volume data**: Use `docker volume inspect <volume-name>` to locate data
 - **Build cache issues**: Use `--no-cache` flag to force fresh build
+- **Secrets missing**: Run `scripts/init-docker-secrets.sh` to regenerate
