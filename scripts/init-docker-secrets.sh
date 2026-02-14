@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-# Secrets initialization for lex-docker infrastructure
+# Secrets initialization for Gantry infrastructure
 # Integrates with Meridian Lex ~/.config/secrets.yaml
 
 SECRETS_FILE="$HOME/.config/secrets.yaml"
 DOCKER_SECRETS_ENV="$(dirname "$0")/../docker-secrets.env"
 
-echo "==> Initializing Docker secrets for lex-docker"
+echo "==> Initializing Docker secrets for Gantry"
 
 # Check if secrets.yaml exists
 if [[ ! -f "$SECRETS_FILE" ]]; then
@@ -148,4 +148,4 @@ chmod 600 "$SECRETS_FILE"
 echo "==> Docker secrets exported to $DOCKER_SECRETS_ENV"
 echo "==> File permissions set to 600"
 echo ""
-echo "✓ Secrets initialization complete"
+echo "[OK] Secrets initialization complete"
