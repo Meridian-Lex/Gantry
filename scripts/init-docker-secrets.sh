@@ -114,6 +114,26 @@ if [[ "${SECRETS[GRAFANA_PASSWORD]}" == "null" ]]; then
     set_secret "grafana.admin_password" "${SECRETS[GRAFANA_PASSWORD]}"
 fi
 
+# Redis
+SECRETS[REDIS_PASSWORD]=$(get_secret "redis.password")
+if [[ "${SECRETS[REDIS_PASSWORD]}" == "null" ]]; then
+    SECRETS[REDIS_PASSWORD]=$(generate_password)
+    set_secret "redis.password" "${SECRETS[REDIS_PASSWORD]}"
+fi
+
+# MinIO
+SECRETS[MINIO_ROOT_USER]=$(get_secret "minio.root_user")
+if [[ "${SECRETS[MINIO_ROOT_USER]}" == "null" ]]; then
+    SECRETS[MINIO_ROOT_USER]="minioadmin"
+    set_secret "minio.root_user" "${SECRETS[MINIO_ROOT_USER]}"
+fi
+
+SECRETS[MINIO_ROOT_PASSWORD]=$(get_secret "minio.root_password")
+if [[ "${SECRETS[MINIO_ROOT_PASSWORD]}" == "null" ]]; then
+    SECRETS[MINIO_ROOT_PASSWORD]=$(generate_password)
+    set_secret "minio.root_password" "${SECRETS[MINIO_ROOT_PASSWORD]}"
+fi
+
 echo "==> Secrets synchronized with $SECRETS_FILE"
 
 # Export to docker-secrets.env
@@ -140,6 +160,13 @@ OPENSEARCH_INITIAL_ADMIN_PASSWORD=${SECRETS[OPENSEARCH_PASSWORD]}
 
 # Grafana
 GF_SECURITY_ADMIN_PASSWORD=${SECRETS[GRAFANA_PASSWORD]}
+
+# Redis
+REDIS_PASSWORD=${SECRETS[REDIS_PASSWORD]}
+
+# MinIO
+MINIO_ROOT_USER=${SECRETS[MINIO_ROOT_USER]}
+MINIO_ROOT_PASSWORD=${SECRETS[MINIO_ROOT_PASSWORD]}
 EOF
 
 chmod 600 "$DOCKER_SECRETS_ENV"
