@@ -16,7 +16,7 @@ volumes:
 
 services:
   postgres:
-    image: ankane/pgvector:pg16
+    image: pgvector/pgvector:0.8.2-pg16
     container_name: stratavore-postgres
     restart: unless-stopped
     env_file:
@@ -39,7 +39,7 @@ services:
       start_period: 40s
 
   qdrant:
-    image: qdrant/qdrant:v1.7.4
+    image: qdrant/qdrant:v1.17.0
     container_name: stratavore-qdrant
     restart: unless-stopped
     ports:
@@ -49,14 +49,14 @@ services:
     networks:
       - backend-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6333/"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/6333"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
 
   opensearch:
-    image: opensearchproject/opensearch:2.11.1
+    image: opensearchproject/opensearch:2.19.4
     container_name: stratavore-opensearch
     restart: unless-stopped
     env_file:
@@ -78,7 +78,7 @@ services:
     networks:
       - backend-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "-u", "admin:${OPENSEARCH_INITIAL_ADMIN_PASSWORD}", "https://localhost:9200/_cluster/health"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9200"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -123,7 +123,7 @@ services:
       start_period: 40s
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4-alpine
     container_name: stratavore-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
@@ -143,7 +143,7 @@ services:
       start_period: 10s
 
   minio:
-    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: stratavore-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -157,7 +157,7 @@ services:
     networks:
       - backend-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9000"]
       interval: 30s
       timeout: 10s
       retries: 3
