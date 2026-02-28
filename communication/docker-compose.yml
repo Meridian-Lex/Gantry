@@ -13,6 +13,26 @@ volumes:
   ntfy_config:
 
 services:
+  gateway:
+    build: ./gateway
+    container_name: stratavore-gateway
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - frontend-network
+      - backend-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - ntfy
+
   ntfy:
     image: binwiederhier/ntfy:latest
     container_name: stratavore-ntfy
