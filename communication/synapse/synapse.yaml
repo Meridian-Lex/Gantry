@@ -1,0 +1,20 @@
+broker:
+  listen: "0.0.0.0:7777"
+  tls_cert: /etc/synapse/certs/broker.crt
+  tls_key: /etc/synapse/certs/broker.key
+  session_ttl_seconds: 86400
+  max_frame_bytes: 4194304
+
+postgres:
+  url: "postgresql://synapse:${SYNAPSE_DB_PASSWORD}@stratavore-postgres:5432/synapse"
+
+redis:
+  url: "redis://:${REDIS_PASSWORD}@stratavore-redis:6379"
+
+webui:
+  enabled: true
+  listen: "0.0.0.0:7778"
+  read_only: false
+
+rate_limit:
+  messages_per_minute: 120

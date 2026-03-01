@@ -1,0 +1,52 @@
+name: Verify
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML files
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do
+            python3 -c "import yaml, sys; yaml.safe_load(open('$f'))" && echo "OK: $f" || { echo "FAIL: $f"; exit 1; }
+          done < <(find . \( -name "*.yml" -o -name "*.yaml" \) -not -path "./.git/*")
+
+      - name: Lint shell scripts
+        run: |
+          if find . -name "*.sh" -not -path "./.git/*" | grep -q .; then
+            find . -name "*.sh" -not -path "./.git/*" | xargs shellcheck --severity=warning
+          else
+            echo "No shell scripts found"
+          fi
+
+      - name: Validate docker-compose files
+        run: |
+          set -euo pipefail
+          # docker compose (V2) is pre-installed on ubuntu-latest runners
+          # Validation failures warn but do not fail — compose files often require
+          # runtime env vars not available in CI. Set STRICT_COMPOSE=true to fail on errors.
+          STRICT_COMPOSE="${STRICT_COMPOSE:-false}"
+          while IFS= read -r -d '' f; do
+            dir=$(dirname "$f")
+            file=$(basename "$f")
+            echo "Validating $f..."
+            if (cd "$dir" && docker compose -f "$file" config --quiet 2>&1); then
+              echo "OK: $f"
+            else
+              echo "WARN: $f (may need env vars)"
+              if [ "$STRICT_COMPOSE" = "true" ]; then
+                exit 1
+              fi
+            fi
+          done < <(find . -name "docker-compose*.yml" -not -path "./.git/*" -print0)
