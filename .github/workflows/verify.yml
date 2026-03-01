@@ -17,9 +17,10 @@ jobs:
 
       - name: Validate YAML files
         run: |
-          find . -name "*.yml" -o -name "*.yaml" | grep -v ".git/" | while read f; do
+          set -euo pipefail
+          while IFS= read -r f; do
             python3 -c "import yaml, sys; yaml.safe_load(open('$f'))" && echo "OK: $f" || { echo "FAIL: $f"; exit 1; }
-          done
+          done < <(find . \( -name "*.yml" -o -name "*.yaml" \) -not -path "./.git/*")
 
       - name: Lint shell scripts
         run: |
@@ -31,10 +32,24 @@ jobs:
 
       - name: Validate docker-compose files
         run: |
-          sudo apt-get install -y docker-compose-plugin 2>/dev/null || true
-          for f in $(find . -name "docker-compose*.yml" -not -path "./.git/*"); do
+          set -euo pipefail
+          if ! sudo apt-get install -y docker-compose-plugin; then
+            echo "ERROR: failed to install docker-compose-plugin"
+            exit 1
+          fi
+          # Validation failures warn but do not fail — compose files often require
+          # runtime env vars not available in CI. Set STRICT_COMPOSE=true to fail on errors.
+          STRICT_COMPOSE="${STRICT_COMPOSE:-false}"
+          while IFS= read -r -d '' f; do
             dir=$(dirname "$f")
             file=$(basename "$f")
             echo "Validating $f..."
-            (cd "$dir" && docker compose -f "$file" config --quiet 2>&1) && echo "OK: $f" || echo "WARN: $f (may need env vars)"
-          done
+            if (cd "$dir" && docker compose -f "$file" config --quiet 2>&1); then
+              echo "OK: $f"
+            else
+              echo "WARN: $f (may need env vars)"
+              if [ "$STRICT_COMPOSE" = "true" ]; then
+                exit 1
+              fi
+            fi
+          done < <(find . -name "docker-compose*.yml" -not -path "./.git/*" -print0)
