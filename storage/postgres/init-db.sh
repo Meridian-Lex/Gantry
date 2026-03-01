@@ -28,6 +28,14 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     GRANT ALL PRIVILEGES ON DATABASE synapse TO synapse;
     \c synapse
     GRANT ALL ON SCHEMA public TO synapse;
+
+    -- Stratavore orchestration database
+    CREATE DATABASE stratavore_state;
+    CREATE USER stratavore WITH PASSWORD '${STRATAVORE_DB_PASSWORD}';
+    GRANT ALL PRIVILEGES ON DATABASE stratavore_state TO stratavore;
+    \c stratavore_state
+    CREATE EXTENSION IF NOT EXISTS vector;
+    GRANT ALL ON SCHEMA public TO stratavore;
 EOSQL
 
 echo "Lex databases initialized successfully"
