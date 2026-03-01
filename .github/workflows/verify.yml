@@ -33,10 +33,7 @@ jobs:
       - name: Validate docker-compose files
         run: |
           set -euo pipefail
-          if ! sudo apt-get install -y docker-compose-plugin; then
-            echo "ERROR: failed to install docker-compose-plugin"
-            exit 1
-          fi
+          # docker compose (V2) is pre-installed on ubuntu-latest runners
           # Validation failures warn but do not fail — compose files often require
           # runtime env vars not available in CI. Set STRICT_COMPOSE=true to fail on errors.
           STRICT_COMPOSE="${STRICT_COMPOSE:-false}"
