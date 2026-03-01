@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # bootstrap-synapse-db.sh — idempotent synapse DB setup on running stratavore-postgres
-# Reads POSTGRES_PASSWORD and SYNAPSE_DB_PASSWORD from docker-secrets.env
+# Reads SYNAPSE_DB_PASSWORD from docker-secrets.env
 # Note: migrations are applied by the broker (sqlx) on first startup
+# Note: psql runs via `docker exec` which uses peer/trust auth — no password required
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,14 +13,10 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
-# Source only the vars we need (avoid eval of full file)
-# POSTGRES_PASSWORD is read to validate the env file is properly initialized,
-# even though docker exec uses trust auth (no password required for exec calls)
-POSTGRES_PASSWORD=$(grep '^POSTGRES_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
 SYNAPSE_DB_PASSWORD=$(grep '^SYNAPSE_DB_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
 
-if [[ -z "$POSTGRES_PASSWORD" || -z "$SYNAPSE_DB_PASSWORD" ]]; then
-  echo "Error: POSTGRES_PASSWORD or SYNAPSE_DB_PASSWORD missing from $ENV_FILE" >&2
+if [[ -z "$SYNAPSE_DB_PASSWORD" ]]; then
+  echo "Error: SYNAPSE_DB_PASSWORD missing from $ENV_FILE" >&2
   exit 1
 fi
 
