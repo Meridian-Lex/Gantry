@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # bootstrap-synapse-db.sh — idempotent synapse DB setup on running stratavore-postgres
 # Reads POSTGRES_PASSWORD and SYNAPSE_DB_PASSWORD from docker-secrets.env
+# Note: migrations are applied by the broker (sqlx) on first startup
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,6 +13,8 @@ if [[ ! -f "$ENV_FILE" ]]; then
 fi
 
 # Source only the vars we need (avoid eval of full file)
+# POSTGRES_PASSWORD is read to validate the env file is properly initialized,
+# even though docker exec uses trust auth (no password required for exec calls)
 POSTGRES_PASSWORD=$(grep '^POSTGRES_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
 SYNAPSE_DB_PASSWORD=$(grep '^SYNAPSE_DB_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)
 
@@ -49,19 +52,5 @@ docker exec stratavore-postgres psql \
   -d synapse \
   -c "GRANT ALL ON SCHEMA public TO synapse;"
 
-echo "Applying Synapse migration..."
-# Run the migration SQL via the synapse user
-docker exec -i stratavore-postgres psql \
-  -U synapse \
-  -d synapse \
-  -v ON_ERROR_STOP=1 \
-  < "$SCRIPT_DIR/../../../projects/synapse/migrations/001_initial.sql" 2>/dev/null || \
-docker exec -i stratavore-postgres psql \
-  -U synapse \
-  -d synapse \
-  -v ON_ERROR_STOP=1 <<'SQL'
--- Migration already applied if tables exist; this is a no-op check
-SELECT COUNT(*) FROM agents;
-SQL
-
 echo "Done. Synapse DB ready on stratavore-postgres."
+echo "Migrations will be applied by the broker on first startup via sqlx."
