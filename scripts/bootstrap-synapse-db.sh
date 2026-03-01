@@ -25,17 +25,10 @@ echo "Bootstrapping synapse database on stratavore-postgres..."
 docker exec -i stratavore-postgres psql \
   -U postgres \
   -v ON_ERROR_STOP=1 \
-  <<SQL
-DO \$\$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'synapse') THEN
-    CREATE USER synapse WITH PASSWORD '${SYNAPSE_DB_PASSWORD}';
-    RAISE NOTICE 'Created user synapse';
-  ELSE
-    RAISE NOTICE 'User synapse already exists';
-  END IF;
-END
-\$\$;
+  -v synapse_pass="$SYNAPSE_DB_PASSWORD" \
+  <<'SQL'
+SELECT format('CREATE USER synapse WITH PASSWORD %L', :'synapse_pass')
+WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'synapse')\gexec
 
 SELECT 'CREATE DATABASE synapse'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'synapse')\gexec

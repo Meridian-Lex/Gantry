@@ -40,10 +40,10 @@ openssl req -new -key "$CERTS_DIR/synapse/broker.key" \
   -out "$CERTS_DIR/synapse/broker.csr" \
   -subj "/CN=synapse-broker/O=Meridian Lex/C=AU"
 
-# Sign with fleet CA, include SANs for Docker service name + localhost
+# Sign with fleet CA, include SANs for Docker service name, container name, and localhost
 cat > "$CERTS_DIR/synapse/broker.ext" <<EXTEOF
 [v3_req]
-subjectAltName = DNS:synapse-broker,DNS:localhost,IP:127.0.0.1
+subjectAltName = DNS:synapse-broker,DNS:stratavore-synapse,DNS:localhost,IP:127.0.0.1
 keyUsage = digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 EXTEOF
