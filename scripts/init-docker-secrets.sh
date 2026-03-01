@@ -134,6 +134,13 @@ if [[ "${SECRETS[MINIO_ROOT_PASSWORD]}" == "null" ]]; then
     set_secret "minio.root_password" "${SECRETS[MINIO_ROOT_PASSWORD]}"
 fi
 
+# Synapse
+SECRETS[SYNAPSE_DB_PASSWORD]=$(get_secret "postgres.synapse_db_password")
+if [[ "${SECRETS[SYNAPSE_DB_PASSWORD]}" == "null" ]]; then
+    SECRETS[SYNAPSE_DB_PASSWORD]=$(generate_password)
+    set_secret "postgres.synapse_db_password" "${SECRETS[SYNAPSE_DB_PASSWORD]}"
+fi
+
 echo "==> Secrets synchronized with $SECRETS_FILE"
 
 # Export to docker-secrets.env
@@ -167,6 +174,9 @@ REDIS_PASSWORD=${SECRETS[REDIS_PASSWORD]}
 # MinIO
 MINIO_ROOT_USER=${SECRETS[MINIO_ROOT_USER]}
 MINIO_ROOT_PASSWORD=${SECRETS[MINIO_ROOT_PASSWORD]}
+
+# Synapse
+SYNAPSE_DB_PASSWORD=${SECRETS[SYNAPSE_DB_PASSWORD]}
 EOF
 
 chmod 600 "$DOCKER_SECRETS_ENV"
