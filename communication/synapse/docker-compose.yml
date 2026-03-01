@@ -1,0 +1,34 @@
+version: "3.9"
+
+networks:
+  backend-network:
+    external: true
+    name: stratavore-backend
+
+services:
+  synapse-broker:
+    build:
+      context: https://github.com/Meridian-Lex/Synapse.git
+      dockerfile: Dockerfile
+    image: meridian-lex/synapse-broker:latest
+    container_name: stratavore-synapse
+    restart: unless-stopped
+    env_file:
+      - ../../docker-secrets.env
+    ports:
+      - "7777:7777"
+      - "7778:7778"
+    volumes:
+      - ${LEX_CERTS_DIR}/synapse:/etc/synapse/certs:ro
+      - ./synapse.yaml:/etc/synapse/synapse.yaml:ro
+    entrypoint: ["/app/entrypoint.sh"]
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/7777"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
