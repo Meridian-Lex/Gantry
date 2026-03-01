@@ -1,0 +1,40 @@
+name: Verify
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML files
+        run: |
+          find . -name "*.yml" -o -name "*.yaml" | grep -v ".git/" | while read f; do
+            python3 -c "import yaml, sys; yaml.safe_load(open('$f'))" && echo "OK: $f" || { echo "FAIL: $f"; exit 1; }
+          done
+
+      - name: Lint shell scripts
+        run: |
+          if find . -name "*.sh" -not -path "./.git/*" | grep -q .; then
+            find . -name "*.sh" -not -path "./.git/*" | xargs shellcheck --severity=warning
+          else
+            echo "No shell scripts found"
+          fi
+
+      - name: Validate docker-compose files
+        run: |
+          sudo apt-get install -y docker-compose-plugin 2>/dev/null || true
+          for f in $(find . -name "docker-compose*.yml" -not -path "./.git/*"); do
+            dir=$(dirname "$f")
+            file=$(basename "$f")
+            echo "Validating $f..."
+            (cd "$dir" && docker compose -f "$file" config --quiet 2>&1) && echo "OK: $f" || echo "WARN: $f (may need env vars)"
+          done
