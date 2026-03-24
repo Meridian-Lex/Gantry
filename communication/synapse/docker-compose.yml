@@ -8,7 +8,7 @@ networks:
 services:
   synapse-broker:
     build:
-      context: https://github.com/Meridian-Lex/Synapse.git#5f3e37a1dc7aa69d68876c3d6bf3e53f4656a264
+      context: https://github.com/Meridian-Lex/Synapse.git#478e3f6f4be3ef7cf633c56e8ecbf6e1b35b8c42
       dockerfile: Dockerfile
     image: meridian-lex/synapse-broker:latest
     container_name: stratavore-synapse
