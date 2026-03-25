@@ -1,0 +1,54 @@
+version: "3.9"
+
+networks:
+  backend-network:
+    external: true
+    name: stratavore-backend
+
+services:
+  synapse-relay-lex:
+    build:
+      context: https://github.com/Meridian-Lex/Synapse.git#master
+      dockerfile: Dockerfile.relay
+    image: meridian-lex/synapse-relay:latest
+    container_name: stratavore-synapse-relay-lex
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7779:7779"
+    volumes:
+      - ${LEX_CERTS_DIR}/ca/ca.crt:/etc/synapse/ca.crt:ro
+      - ./config-lex.toml:/home/appuser/.config/synapse-relay/config.toml:ro
+    environment:
+      SYNAPSE_AGENT: meridian-lex
+      SYNAPSE_SECRET: ${SYNAPSE_LEX_SECRET}
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD", "synapse-relay", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  synapse-relay-harvester:
+    image: meridian-lex/synapse-relay:latest
+    container_name: stratavore-synapse-relay-harvester
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7780:7779"
+    volumes:
+      - ${LEX_CERTS_DIR}/ca/ca.crt:/etc/synapse/ca.crt:ro
+      - ./config-harvester.toml:/home/appuser/.config/synapse-relay/config.toml:ro
+    environment:
+      SYNAPSE_AGENT: harvester
+      SYNAPSE_SECRET: ${SYNAPSE_HARVESTER_SECRET}
+    networks:
+      - backend-network
+    depends_on:
+      - synapse-relay-lex
+    healthcheck:
+      test: ["CMD", "synapse-relay", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
