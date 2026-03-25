@@ -1,0 +1,10 @@
+broker_host = "stratavore-synapse"
+broker_port = 7777
+bind = "0.0.0.0"
+port = 7779
+buffer_capacity = 1000
+reconnect_delay_secs = 2
+reconnect_max_secs = 30
+
+[credentials]
+credentials_file = "/etc/synapse/ca.crt"
