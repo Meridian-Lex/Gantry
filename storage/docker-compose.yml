@@ -39,7 +39,7 @@ services:
       start_period: 40s
 
   qdrant:
-    image: qdrant/qdrant:v1.17.0
+    image: qdrant/qdrant:v1.17.1
     container_name: stratavore-qdrant
     restart: unless-stopped
     ports:
@@ -56,7 +56,7 @@ services:
       start_period: 40s
 
   opensearch:
-    image: opensearchproject/opensearch:2.19.4
+    image: opensearchproject/opensearch:2.19.5
     container_name: stratavore-opensearch
     restart: unless-stopped
     env_file:
