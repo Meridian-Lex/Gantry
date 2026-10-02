@@ -20,7 +20,7 @@ volumes:
 
 services:
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.7
     container_name: stratavore-traefik
     restart: unless-stopped
     ports:
